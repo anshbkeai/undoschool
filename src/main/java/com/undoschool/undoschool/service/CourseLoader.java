@@ -19,16 +19,19 @@ import lombok.extern.slf4j.Slf4j;
 public class CourseLoader {
     private final CourseRepo courseRepo;
     private final ObjectMapper objectMapper;
+   
 
    
 
     public CourseLoader(
             CourseRepo courseRepo,
             ObjectMapper objectMapper
+            
     )
      {
             this.courseRepo = courseRepo;
             this.objectMapper = objectMapper;
+            
      }
 
      @PostConstruct
@@ -40,9 +43,12 @@ public class CourseLoader {
                         log.error("sample-courses.json not found");
                         return;
                     }
+                    System.out.println(org.springframework.data.elasticsearch.core.ElasticsearchOperations.class.getPackage().getImplementationVersion());
+
                     List<CourseDocument> courseDocuments = Arrays.asList(objectMapper.readValue(inputStream,CourseDocument[].class));
                     courseRepo.saveAll(courseDocuments);
                     log.info("Courses loaded into Elasticsearch: {} " ,  courseDocuments.size());
+                   // courseIndexCreate.createIndexIfNotExists();
             } catch (Exception e) {
                 // TODO: handle exception
             }

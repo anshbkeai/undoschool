@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight + Hotel Packages</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-7xl mx-auto space-y-8">
+    <!-- Heading -->
+    <h1 class="text-3xl font-bold text-center text-indigo-700">Search Travel Packages</h1>
+
+    <!-- Form Section -->
+    <form id="search-form" class="bg-white p-6 rounded-xl shadow space-y-4">
+  <div class="grid md:grid-cols-3 gap-4">
+    <input type="text" id="endpoint" placeholder="API Endpoint (e.g., http://localhost:3000)" required
+      class="border border-gray-300 rounded px-4 py-2 w-full" />
+    <input type="text" id="from" placeholder="From (e.g., BOM)" required
+      class="border border-gray-300 rounded px-4 py-2 w-full" />
+    <input type="text" id="to" placeholder="To (e.g., DEL)" required
+      class="border border-gray-300 rounded px-4 py-2 w-full" />
+  </div>
+  <div class="grid md:grid-cols-2 gap-4">
+    <input type="date" id="dateFrom" required
+      class="border border-gray-300 rounded px-4 py-2 w-full" />
+    <input type="date" id="dateTo" required
+      class="border border-gray-300 rounded px-4 py-2 w-full" />
+  </div>
+  <div class="text-center">
+    <button type="submit"
+      class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded">
+      Search Packages
+    </button>
+  </div>
+</form>
+
+
+    <!-- Results Section -->
+    <div id="package-list" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3"></div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+  const formatDate = (datetime) =>
+    new Date(datetime).toLocaleString("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short"
+    });
+
+  const renderPackages = (packages) => {
+    const container = document.getElementById("package-list");
+    container.innerHTML = "";
+
+    packages.forEach(pkg => {
+      const flight = pkg.flights?.[0];
+      const hotel = pkg.hotels?.[0];
+
+      const html = `
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="p-4 space-y-2">
+            <h2 class="text-lg font-bold text-indigo-600">${flight?.airline} (${flight?.flightNumber})</h2>
+            <p class="text-sm">From: <strong>${flight?.departure?.airport}</strong> at ${formatDate(flight?.departure?.at)}</p>
+            <p class="text-sm">To: <strong>${flight?.arrival?.airport}</strong> at ${formatDate(flight?.arrival?.at)}</p>
+            <hr class="my-2"/>
+            <h3 class="font-semibold text-gray-800">Hotel: ${hotel?.name}</h3>
+            <p class="text-sm">Check-in: ${hotel?.checkInDate}, Check-out: ${hotel?.checkOutDate}</p>
+            <p class="text-sm">Rating: ⭐ ${hotel?.rating}</p>
+            <p class="text-sm text-gray-600 italic">${hotel?.notes}</p>
+            <hr class="my-2"/>
+            <p class="font-bold text-lg text-green-700">₹${pkg.totalPrice.toLocaleString()} 
+              <span class="text-sm text-gray-500">(Base ₹${pkg.pricing?.baseFare} + Tax ₹${pkg.pricing?.taxes})</span>
+            </p>
+            <button class="w-full mt-2 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600">Book Now</button>
+          </div>
+        </div>
+      `;
+      container.innerHTML += html;
+    });
+  };
+
+  document.getElementById("search-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const endpoint = document.getElementById("endpoint").value.trim();
+    const from = document.getElementById("from").value.trim().toUpperCase();
+    const to = document.getElementById("to").value.trim().toUpperCase();
+    const dateFrom = document.getElementById("dateFrom").value;
+    const dateTo = document.getElementById("dateTo").value;
+
+    if (!endpoint || !from || !to || !dateFrom || !dateTo) {
+      alert("Please fill all the fields.");
+      return;
+    }
+
+    const url = `${endpoint}/api/search?location=${to}&minPrice=0&startDate=${dateFrom}&endDate=${dateTo}`;
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("API Error");
+      const data = await res.json();
+      renderPackages(data);
+    } catch (err) {
+      alert("Failed to fetch packages. Please check the endpoint or data.");
+      console.error(err);
+    }
+  });
+</script>
+</body>
+</html>

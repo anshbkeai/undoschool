@@ -1,0 +1,2 @@
+q,minAge,maxAge,category,type,minPrice,maxPrice,sort,page,size,expectedCount
+Painting,9,12,Art,ONE_TIME,0,100,upcomming,0,10,1

@@ -388,7 +388,7 @@ curl "http://localhost:8080/api/search?page=1&size=5"
 
 ## Autocomplete Examples
 
-### 1. Physics Suggestions
+### 1. Chemistry Suggestions
 
 **Request:**
 ```bash
